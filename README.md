@@ -48,6 +48,88 @@ The record names are checked by Elm. If you write `.hovre`, the compiler
 reports an error. Each named condition and its CSS rule also come from the
 same `add` call, so there is no second registration list to maintain.
 
+## Shared hover, separate container queries
+
+The card and toolbar below have separate configs. Both use the same container
+query. Each button checks the width of its own nearest container, while the
+hover condition is shared.
+
+Define the hover condition used by both views:
+
+```elm
+import CssHooks
+import Html exposing (button, div, text)
+import Html.Attributes
+
+sharedHooks =
+    CssHooks.define (\hover -> { hover = hover })
+        |> CssHooks.add "&:hover"
+```
+
+The card has its own container. Its button gets more padding when that
+container is wide enough:
+
+```elm
+cardHooks =
+    CssHooks.define (\wide -> { wide = wide })
+        |> CssHooks.add "@container (min-width: 30rem)"
+
+cardView =
+    div [ Html.Attributes.style "container-type" "inline-size" ]
+        [ button
+            [ CssHooks.attribute
+                ([ ( "background", "navy" ), ( "padding", "8px" ) ]
+                    |> CssHooks.on sharedHooks .hover
+                        [ ( "background", "blue" ) ]
+                    |> CssHooks.on cardHooks .wide
+                        [ ( "padding", "16px" ) ]
+                )
+            ]
+            [ text "Open card" ]
+        ]
+```
+
+The toolbar has a separate container. It uses the same query, but changes
+font size:
+
+```elm
+toolbarHooks =
+    CssHooks.define (\wide -> { wide = wide })
+        |> CssHooks.add "@container (min-width: 30rem)"
+
+toolbarView =
+    div [ Html.Attributes.style "container-type" "inline-size" ]
+        [ button
+            [ CssHooks.attribute
+                ([ ( "background", "navy" ), ( "font-size", "14px" ) ]
+                    |> CssHooks.on sharedHooks .hover
+                        [ ( "background", "blue" ) ]
+                    |> CssHooks.on toolbarHooks .wide
+                        [ ( "font-size", "18px" ) ]
+                )
+            ]
+            [ text "Toolbar action" ]
+        ]
+```
+
+Add the stylesheets once, then render both views:
+
+```elm
+view =
+    div []
+        [ CssHooks.styleElement sharedHooks
+        , CssHooks.styleElement cardHooks
+        , CssHooks.styleElement toolbarHooks
+        , cardView
+        , toolbarView
+        ]
+```
+
+The two `@container` strings generate the same CSS variable and rule. That is
+safe: the rule is identical, and the browser evaluates it for each button's
+container. Include each config's `styleElement` once, even if you render a
+component more than once.
+
 ## Selectors and conditions
 
 Use `&` where the styled element belongs in a selector. `&:hover` matches
