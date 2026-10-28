@@ -75,7 +75,12 @@ type alias Style =
 {-| Start a config. The function names the conditions supplied by later `add`
 calls. Its arguments and the `add` calls must be in the same order:
 
-    CssHooks.define (\hover wide -> { hover = hover, wide = wide })
+    CssHooks.define
+        (\hover wide ->
+            { hover = hover
+            , wide = wide
+            }
+        )
         |> CssHooks.add "&:hover"
         |> CssHooks.add "@media (min-width: 600px)"
 
@@ -152,7 +157,9 @@ Start with a base style and pipe it through `on`. Each call takes the config,
 the condition to select, and the properties to change:
 
     [ ( "background", "navy" ) ]
-        |> CssHooks.on config .hover [ ( "background", "blue" ) ]
+        |> CssHooks.on config
+            .hover
+            [ ( "background", "blue" ) ]
 
 You can use multiple `on` calls. The later call wins if two calls set the same
 property. A property with no base value falls back to `revert-layer` when its
