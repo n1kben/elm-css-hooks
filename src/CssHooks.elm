@@ -19,13 +19,14 @@ base style, then use `on` to change it when a condition matches.
     view =
         Html.div []
             [ CssHooks.styleElement config
-            , Html.button [ CssHooks.attribute buttonStyle ] [ Html.text "Save" ]
+            , Html.button
+                [ CssHooks.attribute buttonStyle ]
+                [ Html.text "Save" ]
             ]
 
-`define` gives the condition a name. `add` supplies its selector and registers
-the CSS rule. Put `styleElement config` in the page once; the style values on
-each element remain inline. The [CSS Hooks introduction](https://css-hooks.com/docs/introduction/)
-explains the CSS custom properties behind this.
+`define` gives the condition a name. `add` adds its selector to the config.
+Put `styleElement config` in the page once; the style values on each element
+remain inline.
 
 # Configuring hooks
 
@@ -46,8 +47,8 @@ import Html exposing (Html)
 import Html.Attributes
 
 
-{-| The conditions created by `define` and `add`, along with their stylesheet
-rules. The type parameter is the record of names you choose for the conditions.
+{-| A named set of conditions. The type parameter is the record of names you
+choose for the conditions.
 -}
 type Config a
     = Config (List ( String, String )) a
@@ -84,10 +85,9 @@ define make =
     Config [] make
 
 
-{-| Add a selector or at-rule. This registers its stylesheet rule and supplies
-its condition to the function in `define`. Each call fills one argument of that
-function. Supported at-rules are `@media`, `@container`, `@supports`, `@scope`,
-and `@starting-style`.
+{-| Add a selector or at-rule to a config. Each call supplies one condition to
+the function in `define`, in argument order. Supported at-rules are `@media`,
+`@container`, `@supports`, `@scope`, and `@starting-style`.
 
     config =
         CssHooks.define (\hover -> { hover = hover })
